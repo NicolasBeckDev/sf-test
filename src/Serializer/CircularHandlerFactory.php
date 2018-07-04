@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Serializer;
 
 class CircularHandlerFactory
 {
     /**
-    * @return \Closure
-    */
+     * @return \Closure
+     */
     public static function getId()
     {
         return function ($object) {

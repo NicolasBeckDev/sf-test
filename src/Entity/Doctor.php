@@ -29,14 +29,21 @@ class Doctor
     private $firstname;
 
     /**
-     * Many Doctors have Many Schedules.
-     * @ORM\ManyToMany(targetEntity="Schedule", inversedBy="doctors")
-     * @ORM\JoinTable(name="doctors_schedules")
+     * @ORM\OneToMany(targetEntity="App\Entity\Schedule", mappedBy="doctor")
      */
     private $schedules;
 
-    public function __construct() {
-        $this->schedules = new \Doctrine\Common\Collections\ArrayCollection();
+    public function __construct()
+    {
+        $this->schedules = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection|Product[]
+     */
+    public function getSchedules(): Collection
+    {
+        return $this->schedules;
     }
 
     public function getId()
@@ -68,33 +75,4 @@ class Doctor
         return $this;
     }
 
-    public function getSchedules(): Collection
-    {
-        return $this->schedules;
-    }
-
-    public function setSchedules(?array $schedules): self
-    {
-        $this->schedules = $schedules;
-
-        return $this;
-    }
-
-    public function addSchedule(Schedule $schedule): self
-    {
-        if (!$this->schedules->contains($schedule)) {
-            $this->schedules[] = $schedule;
-        }
-
-        return $this;
-    }
-
-    public function removeSchedule(Schedule $schedule): self
-    {
-        if ($this->schedules->contains($schedule)) {
-            $this->schedules->removeElement($schedule);
-        }
-
-        return $this;
-    }
 }

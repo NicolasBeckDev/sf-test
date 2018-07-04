@@ -27,7 +27,7 @@ class Patient
     private $firstname;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="string", length=255)
      */
     private $appointment;
 
@@ -60,12 +60,12 @@ class Patient
         return $this;
     }
 
-    public function getAppointment(): ?\DateTimeInterface
+    public function getAppointment(): ?string
     {
         return $this->appointment;
     }
 
-        public function setAppointment(\DateTimeInterface $appointment): self
+        public function setAppointment(string $appointment): self
     {
         $this->appointment = $appointment;
 

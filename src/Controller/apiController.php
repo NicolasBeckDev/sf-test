@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Doctor;
 use App\Entity\Patient;
-use App\Repository\MedecinRepository;
+use App\Repository\DoctorRepository;
 use App\Repository\PatientRepository;
+use App\Repository\ScheduleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\View\View;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,17 +25,19 @@ class apiController extends Controller
     private $normalizer;
     private $serializer;
     private $em;
-    private $medecinRepository;
+    private $doctorRepository;
     private $patientRepository;
+    private $scheduleRepository;
 
-    public function __construct(EntityManagerInterface $em, MedecinRepository $medecinRepository, PatientRepository $patientRepository)
+    public function __construct(EntityManagerInterface $em, DoctorRepository $doctorRepository, PatientRepository $patientRepository, ScheduleRepository $scheduleRepository)
     {
         $this->encoder = [new JsonEncoder()];
         $this->normalizer = [new ObjectNormalizer()];
         $this->serializer = new Serializer($this->normalizer, $this->encoder);
         $this->em = $em;
-        $this->medecinRepository = $medecinRepository;
+        $this->doctorRepository = $doctorRepository;
         $this->patientRepository = $patientRepository;
+        $this->scheduleRepository = $scheduleRepository;
     }
 
     /**
@@ -42,59 +46,70 @@ class apiController extends Controller
      */
     public function getDoctor()
     {
-        return View::create($this->medecinRepository->findAll(), Response::HTTP_OK);
+        return View::create($this->doctorRepository->findAll(), Response::HTTP_OK);
     }
 
     /**
-     * @Rest\Get("/api/doctor/{id}", name="doctorByID")
+     * @Rest\Get("/api/doctors/{id}", name="doctorByID")
      * @param int $id
      * @return \FOS\RestBundle\View\View
      */
     public function getDoctorById(int $id)
     {
-        return View::create($this->medecinRepository->find($id), Response::HTTP_OK);
+        return View::create($this->doctorRepository->find($id), Response::HTTP_OK);
     }
 
     /**
-     * @Rest\Get("/api/patient/{id}", name="patient")
+     * @Rest\Get("/api/schedules", name="doctorByID")
      * @return \FOS\RestBundle\View\View
      */
-    public function getClient()
+    public function getSchedules()
     {
-        return View::create($this->patientRepository->find(0), Response::HTTP_OK);
+        $schedules = $this->scheduleRepository->findAll();
+
+        $list = [];
+
+        foreach ($schedules as $schedule){
+            $list[substr($schedule->getSchedule(), 0, 10)][] = $schedule;
+        }
+
+        return View::create($list, Response::HTTP_OK);
     }
 
     /**
-     * @Route("/api/patient", name="patient")
-     * @param \DateTime $date
+     * @Rest\Get("/api/patient", name="patient")
+     * @return \FOS\RestBundle\View\View
+     */
+    public function getPatient()
+    {
+        return View::create($this->patientRepository->find(1), Response::HTTP_OK);
+    }
+
+    /**
+     * @Rest\Post("/api/patient", name="patientPost")
+     * @param Request $request
      * @return bool|float|int|string
      */
-    public function setClient(\DateTime $date)
+    public function setPatient(Request $request)
     {
-        $patient = $this->patientRepository->find(0);
-
-        $patient->setAppointment($date);
-
+        $patient = $this->patientRepository->find(1);
+        $patient->setAppointment($request->get('appointment'));
         $this->em->persist($patient);
         $this->em->flush();
-
         return View::create($patient, Response::HTTP_OK);
     }
 
-
     /**
-     * @Rest\Get("/api/video/{time}", name="video")
+     * @Rest\Get("/api/videos/{time}", name="video")
      * @param int $time
      * @return \FOS\RestBundle\View\View
      */
     public function getVideo(int $time)
     {
-
-        if($time < 5 or $time > 15) {
+        if ($time < 5 or $time > 15) {
             return View::create(['response' => 'KO'], Response::HTTP_NOT_FOUND);
         }
-
-        switch($time) {
+        switch ($time) {
             case 5 :
                 $video = [
                     'code' => 'x6iik1g',
@@ -184,29 +199,6 @@ class apiController extends Controller
                 ];
                 break;
         }
-
         return View::create($video, Response::HTTP_OK);
     }
-
-
-
-
-
-
-
-
-//        if($firstDate->format('h') < '6' ){
-//            $firstDate->setTime(6, 0, 0,0);
-//        }elseif($firstDate->format('h') > '20'){
-//            $firstDate
-//                ->setDate(intval($firstDate->format('Y')), intval($firstDate->format('m')), intval($firstDate->format('d'))+1)
-//                ->setTime(6, 0,0,0);
-//        }else{
-//            $h = intval($firstDate->format('i'));
-//            if ( $h >= 0 && $h < 15) { $firstDate->setTime(intval($firstDate->format('H')), 15);  }
-//            elseif ( $h >= 15 && $h < 30 ) { $firstDate->setTime(intval($firstDate->format('H')), 30); }
-//            elseif ( $h >= 30 && $h < 45 ) { $firstDate->setTime(intval($firstDate->format('H')), 45); }
-//            elseif ( $h >= 45 && $h < 60 ) { $firstDate->setTime(intval($firstDate->format('H'))+1, 0); }
-//        }
-
 }

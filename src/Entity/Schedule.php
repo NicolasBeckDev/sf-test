@@ -20,18 +20,26 @@ class Schedule
     private $id;
 
     /**
-     * @ORM\Column(type="datetime", length=255)
+     * @ORM\Column(type="string", length=255)
      */
     private $schedule;
 
     /**
-     * Many Schedules have Many Doctors.
-     * @ORM\ManyToMany(targetEntity="Doctor", mappedBy="schedules")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Doctor", inversedBy="schedules")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $doctors;
+    private $doctor;
 
-    public function __construct() {
-        $this->doctors = new \Doctrine\Common\Collections\ArrayCollection();
+    public function getDoctor(): ?Doctor
+    {
+        return $this->doctor;
+    }
+
+    public function setDoctor(Doctor $doctor): self
+    {
+        $this->doctor = $doctor;
+
+        return $this;
     }
 
     public function getId()
@@ -39,40 +47,14 @@ class Schedule
         return $this->id;
     }
 
-    public function getSchedule()
+    public function getSchedule(): ?string
     {
-        return $this->schedule->format('Y-m-d H:i:s');
+        return $this->schedule;
     }
 
-    public function setSchedule(\DateTime $schedule): self
+    public function setSchedule(string $schedule): self
     {
         $this->schedule = $schedule;
-
-        return $this;
-    }
-
-
-    public function getDoctors(): Collection
-    {
-        return $this->doctors;
-    }
-
-    public function addDoctor(Doctor $doctor): self
-    {
-        if (!$this->doctors->contains($doctor)) {
-            $this->doctors[] = $doctor;
-            $doctor->addSchedule($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDoctor(Doctor $doctor): self
-    {
-        if ($this->doctors->contains($doctor)) {
-            $this->doctors->removeElement($doctor);
-            $doctor->removeSchedule($this);
-        }
 
         return $this;
     }

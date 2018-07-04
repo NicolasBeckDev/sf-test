@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Doctor[]    findAll()
  * @method Doctor[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class MedecinRepository extends ServiceEntityRepository
+class DoctorRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
