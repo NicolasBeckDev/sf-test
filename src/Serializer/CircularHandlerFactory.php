@@ -9,7 +9,7 @@ class CircularHandlerFactory
     public static function getId()
     {
         return function ($object) {
-            return null;
+            return $object->getId();
         };
     }
 }
